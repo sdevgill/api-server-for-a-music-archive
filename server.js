@@ -32,3 +32,51 @@ function getNewSongId() {
 }
 
 /* ======================= PROCESS SERVER REQUESTS ======================= */
+const server = http.createServer((req, res) => {
+  console.log(`${req.method} ${req.url}`);
+
+  // assemble the request body
+  let reqBody = "";
+  req.on("data", (data) => {
+    reqBody += data;
+  });
+
+  req.on("end", () => { // finished assembling the entire request body
+    // Parsing the body of the request depending on the "Content-Type" header
+    if (reqBody) {
+      switch (req.headers['content-type']) {
+        case "application/json":
+          req.body = JSON.parse(reqBody);
+          break;
+        case "application/x-www-form-urlencoded":
+          req.body = reqBody
+            .split("&")
+            .map((keyValuePair) => keyValuePair.split("="))
+            .map(([key, value]) => [key, value.replace(/\+/g, " ")])
+            .map(([key, value]) => [key, decodeURIComponent(value)])
+            .reduce((acc, [key, value]) => {
+              acc[key] = value;
+              return acc;
+            }, {});
+          break;
+        default:
+          break;
+      }
+      console.log(req.body);
+    }
+
+    /* ========================== ROUTE HANDLERS ========================== */
+
+
+
+    // 404 handler
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'application/json');
+    res.write("Endpoint not found");
+    return res.end();
+  });
+});
+
+const port = 5000;
+
+server.listen(port, () => console.log('Server is listening on port', port));

@@ -204,7 +204,7 @@
       "headers": {
         "Content-Type": "application/json"
       },
-      "statusCode": 200,
+      "statusCode": 201,
       "body": {
         "name": "2030 Album",
         "albumId": 2,
