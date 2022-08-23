@@ -14,5 +14,7 @@ Use the following commands to run the server:
 node server.js
 ```
 
+Or navigate to the live application at: [https://api-server-for-a-music-archive.herokuapp.com/](https://api-server-for-a-music-archive.herokuapp.com/)
+
 Test the endpoint with Postman and/or in the browser's "Console" tab using
 `fetch`.
