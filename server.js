@@ -189,6 +189,139 @@ const server = http.createServer((req, res) => {
       }
     }
 
+    // 9. Edit an album's details based on albumId
+    if ((req.method === 'PUT' || req.method === 'PATCH') && req.url.startsWith('/albums/')) {
+      if (urlParts.length === 3) {
+        const albumId = urlParts[2];
+        const album = albums[albumId];
+        album.name = req.body.name;
+
+        res.statusCode = 201;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(album));
+      }
+    }
+
+    // 10. Delete an album based on albumId
+    if (req.method === 'DELETE' && req.url.startsWith('/albums/')) {
+      if (urlParts.length === 3) {
+        const albumId = urlParts[2];
+        delete albums[albumId];
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify({ message: "Successfully deleted" }));
+      }
+    }
+
+    // 11. Get all the songs of an artist based on artistId
+    if (req.method === 'GET' && req.url.startsWith('/artists/') && req.url.endsWith('/songs')) {
+      const artistId = urlParts[2];
+      const artistSongs = [];
+      for (const songKey in songs) {
+        const song = songs[songKey];
+        const albumId = song.albumId;
+        if (albums[albumId].artistId === parseInt(artistId)) {
+          artistSongs.push(song);
+        }
+      }
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type','application/json');
+      return res.end(JSON.stringify(artistSongs));
+    }
+
+    // 12. Get all songs of an album based on albumId
+    if (req.method === 'GET' && req.url.startsWith('/albums/') && req.url.endsWith('/songs')) {
+      const albumId = urlParts[2];
+      const albumSongs = [];
+      for (const songKey in songs) {
+        const song = songs[songKey];
+        if (song.albumId === parseInt(albumId)) {
+          albumSongs.push(song);
+        }
+      }
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type','application/json');
+      return res.end(JSON.stringify(albumSongs));
+    }
+
+    // 13. Get all songs of a specified trackNumber
+    if (req.method === 'GET' && req.url.startsWith('/trackNumbers/')) {
+      if (urlParts.length === 4) {
+        const trackNumber = urlParts[2];
+        const trackNumberSongs = [];
+        for (const songKey in songs) {
+          const song = songs[songKey];
+          if (song.trackNumber === parseInt(trackNumber)) {
+            trackNumberSongs.push(song);
+          }
+        }
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(trackNumberSongs));
+      }
+    }
+
+    // 14. Get a specific song's details based on songId
+    if (req.method === 'GET' && req.url.startsWith('/songs/')) {
+      if (urlParts.length === 3) {
+        const songId = urlParts[2];
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(songs[songId]));
+      }
+    }
+
+    // 15. Add a song to a specific album based on albumId
+    if (req.method === 'POST' && req.url.startsWith('/albums/') && req.url.endsWith('/songs')) {
+      if (urlParts.length === 4) {
+        const albumId = urlParts[2];
+        const newSong = {
+          "songId": getNewSongId(),
+          "name": req.body.name,
+          "albumId": albumId,
+          "trackNumber": req.body.trackNumber,
+          "lyrics": req.body.lyrics
+        };
+        songs[newSong.songId] = newSong;
+
+        res.statusCode = 201;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(newSong));
+      }
+    }
+
+    // 16. Edit a song's details based on songId
+    if ((req.method === 'PUT' || req.method === 'PATCH') && req.url.startsWith('/songs/')) {
+      if (urlParts.length === 3) {
+        const songId = urlParts[2];
+        const song = songs[songId];
+        song.name = req.body.name;
+        song.trackNumber = req.body.trackNumber;
+        song.lyrics = req.body.lyrics;
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(song));
+      }
+    }
+
+    // 17. Delete a song based on songId
+    if (req.method === 'DELETE' && req.url.startsWith('/songs/')) {
+      if (urlParts.length === 3) {
+        const songId = urlParts[2];
+        delete songs[songId];
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify({ message: "Successfully deleted" }));
+      }
+    }
+
 
     // 404 handler
     res.statusCode = 404;
