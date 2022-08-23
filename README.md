@@ -8,5 +8,11 @@ This will include the endpoints for the server.
 
 ## Instructions
 
+Use the following commands to run the server:
+
+```bash
+node server.js
+```
+
 Test the endpoint with Postman and/or in the browser's "Console" tab using
 `fetch`.

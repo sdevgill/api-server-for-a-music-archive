@@ -67,6 +67,127 @@ const server = http.createServer((req, res) => {
 
     /* ========================== ROUTE HANDLERS ========================== */
 
+    const urlParts = req.url.split("/");
+
+    // 1. Get all the artists
+    if (req.method === "GET" && req.url === "/artists") {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      return res.end(JSON.stringify(artists));
+    }
+
+    // 2. Get an artist by id
+    if (req.method === "GET" && req.url.startsWith("/artists/")) {
+      if (urlParts.length === 3) {
+        const artistId = urlParts[2];
+        const artist = artists[artistId];
+
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify(artist));
+      }
+    }
+
+    // 3. Create a new artist
+    if (req.method === "POST" && req.url === "/artists") {
+      const newArtist = {
+        name: req.body.name,
+        artistId: getNewArtistId()
+      };
+      artists[newArtist.artistId] = newArtist;
+
+      res.statusCode = 201;
+      res.setHeader("Content-Type", "application/json");
+      return res.end(JSON.stringify(newArtist));
+    }
+
+    // 4. Update an artist
+    if ((req.method === "PUT" || req.method === "PATCH") && req.url.startsWith("/artists/")) {
+      if (urlParts.length === 3) {
+        const artistId = urlParts[2];
+        const artist = artists[artistId];
+        artist.name = req.body.name;
+
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify(artist));
+      }
+    }
+
+    // 5. Delete an artist
+    if (req.method === "DELETE" && req.url.startsWith("/artists/")) {
+      if (urlParts.length === 3) {
+        const artistId = urlParts[2];
+        // const artist = artists[artistId];
+        delete artists[artistId];
+
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify({ message: "Successfully deleted" }));
+      }
+    }
+
+    // 6. Get all the albums for an artist
+    if (req.method === 'GET' && req.url.startsWith('/artists/') && req.url.endsWith('/albums')) {
+      if (urlParts.length === 4) {
+        const artistId = urlParts[2];
+        const artistAlbums = [];
+        for (const albumKey in albums) {
+          const album = albums[albumKey];
+          if (album.artistId === parseInt(artistId)) {
+            artistAlbums.push(album);
+          }
+        }
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(artistAlbums));
+      }
+    }
+
+    // 7. Get a specific album's details based on albumId
+    if (req.method === 'GET' && req.url.startsWith('/albums/')) {
+      if (urlParts.length === 3) {
+        const albumId = urlParts[2];
+        const album = albums[albumId];
+        const artistId = album.artistId;
+        const albumDetails = {
+          "albumId": album.albumId,
+          "name": album.name,
+          "artistId": artistId,
+          "artist": artists[artistId],
+          "songs": []
+        };
+
+        for (const songKey in songs) {
+          const song = songs[songKey];
+          if (song.albumId === parseInt(albumId)) {
+            albumDetails["songs"].push(song);
+          }
+        }
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(albumDetails));
+      }
+    }
+
+    // 8. Add an album to a specific artist based on artistId
+    if (req.method === 'POST' && req.url.startsWith('/artists/') && req.url.endsWith('/albums')) {
+      if (urlParts.length === 4) {
+        const artistId = urlParts[2];
+        const newAlbum = {
+          "albumId": getNewAlbumId(),
+          "name": req.body.name,
+          "artistId": artistId
+        };
+        albums[newAlbum.albumId] = newAlbum;
+
+        res.statusCode = 201;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify(newAlbum));
+      }
+    }
 
 
     // 404 handler
